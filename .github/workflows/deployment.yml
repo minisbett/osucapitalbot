@@ -1,0 +1,34 @@
+name: Deployment
+
+on:
+  push:
+    branches: [ "release" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build the Docker image
+      working-directory: .
+      run: docker build . -t ${{ secrets.DOCKERHUB_USERNAME }}/osucapitalbot:latest
+
+    - name: Log into Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Push the image to Docker Hub
+      run: docker push minisbett/osucapitalbot
+
+    - name: Deploy the image on production server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        script: |
+          chmod +x /root/osucapitalbot/deploy.sh
+          /root/osucapitalbot/deploy.sh
