@@ -1,4 +1,6 @@
 ﻿using Discord;
+using osucapitalbot.Models.Osu;
+using System.Runtime.Serialization;
 
 namespace osucapitalbot.Utilities;
 
@@ -11,7 +13,7 @@ internal static class Embeds
   /// Returns a base embed all other embeds should be based on.
   /// </summary>
   private static EmbedBuilder BaseEmbed => new EmbedBuilder()
-    .WithColor(new Color(0x99377A /* 0xF1C40F */))
+    .WithColor(new Color(0x99377A))
     .WithFooter($"osu!capital bot v{Program.VERSION} by minisbett", "https://osucapital.com/favicon.ico")
     .WithCurrentTimestamp();
 
@@ -19,7 +21,6 @@ internal static class Embeds
   /// Returns an error embed for displaying an internal error message.
   /// </summary>
   /// <param name="message">The error message.</param>
-  /// <returns>An embed for displaying an internal error message.</returns>
   public static Embed InternalError(string message) => BaseEmbed
     .WithColor(Color.DarkRed)
     .WithTitle("An internal error occured.")
@@ -30,7 +31,6 @@ internal static class Embeds
   /// Returns an error embed for displaying an error message.
   /// </summary>
   /// <param name="message">The error message.</param>
-  /// <returns>An embed for displaying an error message.</returns>
   public static Embed Error(string message) => BaseEmbed
     .WithColor(Color.Red)
     .WithDescription(message)
@@ -40,7 +40,6 @@ internal static class Embeds
   /// Returns an error embed for displaying a neutral message.
   /// </summary>
   /// <param name="message">The neutral message.</param>
-  /// <returns>An embed for displaying a neutral message.</returns>
   public static Embed Neutral(string message) => BaseEmbed
     .WithDescription(message)
     .Build();
@@ -49,7 +48,6 @@ internal static class Embeds
   /// Returns an error embed for displaying a success message.
   /// </summary>
   /// <param name="message">The success message.</param>
-  /// <returns>An embed for displaying a success message.</returns>
   public static Embed Success(string message) => BaseEmbed
     .WithColor(Color.Green)
     .WithDescription(message)
@@ -60,7 +58,6 @@ internal static class Embeds
   /// </summary>
   /// <param name="osuAvailable">Bool whether the osu! API v1 is available.</param>
   /// <param name="capitalAvailable">Bool whether osu!capital is available.</param>
-  /// <returns>An embed for displaying info about the bot.</returns>
   public static Embed Info(bool osuAvailable, bool capitalAvailable) => BaseEmbed
     .WithTitle($"Information about osu!capital bot {Program.VERSION}")
     .WithDescription("This bot aims to provide interaction with [osu!capital](https://osucapital.com/) via Discord." +
@@ -70,8 +67,31 @@ internal static class Embeds
     .WithThumbnailUrl("https://cdn.discordapp.com/attachments/1009893434087198720/1198990312157220964/favicon.png")
     .Build();
 
+  /// <summary>
+  /// Returns an embed for displaying the change of PP of an osu! user.
+  /// </summary>
+  /// <param name="user">The current state of the user.</param>
+  /// <param name="last">The last state of the user.</param>
+  public static Embed StockWatcherPPChange(RankedOsuUser user, RankedOsuUser last)
+  {
+    // Calculate statistics.
+    double ppDiff = user.PP - last.PP;
+    double ppDiffPercent = (user.PP / last.PP - 1) * 100;
+    int rankDiff = user.Rank - last.Rank;
+    double rankDiffPercent = (last.Rank * 1d / user.Rank - 1) * 100;
+    
+    return BaseEmbed
+      .WithColor(user.PP > last.PP ? Color.Green : Color.Red)
+      .WithAuthor(user.User.Name, user.User.AvatarUrl, $"https://osucapital.com/stock/{user.User.Id}")
+      .WithDescription($"[View Profile](https://osu.ppy.sh/u/{user.User.Id}) • [View Stock](https://osucapital.com/stock/{user.User.Id})")
+      .AddField($"{last.PP:N0}pp → {user.PP:N0}pp", $"{ppDiff:+0;-0;0}pp ({ppDiffPercent:+0.00;-0.00}%)", true)
+      .AddField($"#{last.Rank:N0} → #{user.Rank:N0}", $"{(rankDiff <= 0 ? "+" : "-")}#{Math.Abs(rankDiff)} ({rankDiffPercent:+0.00;-0.00}%)", true)
+      .Build();
+    }
+
   public static Embed LoginInstructions => BaseEmbed
     .WithTitle("Login Instructions")
     .WithDescription("In order to allow the bot to interact with osu!capital on your behalf, you will need to provide your osu!capital session cookie. Instructions on how to obtain it can be found below.")
     .Build();
 }
+

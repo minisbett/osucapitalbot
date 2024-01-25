@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using osucapitalbot.Models.Osu;
+using osucapitalbot.Utilities;
 using System.Net;
 using System.Text;
 
@@ -38,14 +40,15 @@ public class OsuApiService
   }
 
   /// <summary>
-  /// Returns a bool whether a connection to the osu! API v2 can be established.
+  /// Returns whether an authorized connection to the osu! API v2 can be established.
   /// </summary>
-  /// <returns>Bool whether a connection can be established.</returns>
-  public async Task<bool> IsAvailableAsync()
+  /// <returns>Result whether a connection can be established.</returns>
+  public async Task<Result> CheckAvailableAsync()
   {
     // Make sure a valid access token exists.
-    if (!await EnsureAccessTokenAsync())
-      return false;
+    Result result = await EnsureAccessTokenAsync();
+    if (result.IsFailure)
+      return result;
 
     try
     {
@@ -56,12 +59,12 @@ public class OsuApiService
       if (response.StatusCode != HttpStatusCode.NotFound)
         throw new Exception($"API returned status code {response.StatusCode}. Expected: NotFound (404)."); // Gives 401 Unauthorized if invalid client credentials.
 
-      return true;
+      return Result.Success();
     }
     catch (Exception ex)
     {
-      _logger.LogError("IsAvailable() returned false: {Message}", ex.Message);
-      return false;
+      _logger.LogError("CheckAvailableAsync() failed: {Message}", ex.Message);
+      return Error.APIUnavailable;
     }
   }
 
@@ -69,11 +72,11 @@ public class OsuApiService
   /// Ensures that the current osu! API v2 access token is valid and returns whether it is valid or was successfully refreshed.
   /// </summary>
   /// <returns>Bool whether the access token is valid or was successfully refreshed.</returns>
-  public async Task<bool> EnsureAccessTokenAsync()
+  public async Task<Result> EnsureAccessTokenAsync()
   {
     // Check whether the access token is still valid.
     if (DateTimeOffset.Now < _accessTokenExpiresAt)
-      return true;
+      return Result.Success();
 
     _logger.LogInformation("The osu! API v2 access token has expired. Requesting a new one...");
 
@@ -107,9 +110,38 @@ public class OsuApiService
     catch (Exception ex)
     {
       _logger.LogError("Failed to request an osu! API v2 access token: {Message}", ex.Message);
-      return false;
+      return Error.OAuthAuthorization;
     }
 
-    return true;
+    return Result.Success();
+  }
+
+  /// <summary>
+  /// Returns users in the global osu!standard ranking on the specified page.<br/>
+  /// One page equals to 50 users, and the top 10,000 users can be received.
+  /// </summary>
+  /// <param name="page">The page.</param>
+  /// <returns>The ranked osu! users.</returns>
+  public async Task<Result<RankedOsuUser[]>> GetRankingAsync(int page)
+  {
+    // Ensure a valid access token.
+    Result result = await EnsureAccessTokenAsync();
+    if (result.IsFailure)
+      return Result.Failure<RankedOsuUser[]>(result.Error!);
+
+    try
+    {
+      // Get the JSON from the osu! API.
+      string json = await _http.GetStringAsync($"api/v2/rankings/osu/performance?cursor[page]={page}");
+
+      // Parse the JSON into a dynamic object and try to convert it into an array of users.
+      dynamic response = JsonConvert.DeserializeObject<dynamic>(json)!;
+      return JsonConvert.DeserializeObject<RankedOsuUser[]>(response.ranking.ToString());
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError("Failed to request the leaderboard ranking at page {Page}: {Message}", page, ex.Message);
+      return Result.Failure<RankedOsuUser[]>(Error.Unspecific);
+    }
   }
 }

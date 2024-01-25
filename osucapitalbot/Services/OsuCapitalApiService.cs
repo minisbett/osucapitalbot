@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using osucapitalbot.Models.Capital;
+using osucapitalbot.Utilities;
 using System.Net;
 using System.Text;
 
@@ -23,21 +24,21 @@ public class OsuCapitalApiService
   }
 
   /// <summary>
-  /// Returns a bool whether a connection to osu!capital can be established.
+  /// Returns whether a connection to osu!capital can be established.
   /// </summary>
-  /// <returns>Bool whether a connection can be established.</returns>
-  public async Task<bool> IsAvailableAsync()
+  /// <returns>Result whether a connection can be established.</returns>
+  public async Task<Result> CheckAvailableAsync()
   {
     try
     {
       // Try to send a request to the base URL.
       await _http.GetAsync("");
-      return true;
+      return Result.Success();
     }
     catch (Exception ex)
     {
-      _logger.LogError("IsAvailable() returned false: {Message}", ex.Message);
-      return false;
+      _logger.LogError("CheckAvailableAsync() failed: {Message}", ex.Message);
+      return Error.APIUnavailable;
     }
   }
 

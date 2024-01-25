@@ -105,6 +105,9 @@ public class Program
         // Add the handler for Discord interactions.
         services.AddHostedService<InteractionHandler>();
 
+        // Add the UserWatcherService, responsible for the stock live-feed.
+        services.AddHostedService<PlayerWatcherService>();
+
         // Add the osu! API service for communicating with the osu! API.
         services.AddSingleton<OsuApiService>();
 
@@ -147,9 +150,9 @@ public class Program
     // Ensure that all APIs are available.
     OsuApiService osu = host.Services.GetRequiredService<OsuApiService>();
     OsuCapitalApiService capital = host.Services.GetRequiredService<OsuCapitalApiService>();
-    if (!await osu.IsAvailableAsync())
+    if (!(await osu.CheckAvailableAsync()).IsSuccessful)
       throw new Exception("The osu! API v2 was deemed unavailable at startup.");
-    if (!await capital.IsAvailableAsync())
+    if (!(await capital.CheckAvailableAsync()).IsSuccessful)
       throw new Exception("The osu!capital API was deemed unavailable at startup.");
 
     // Run the host.

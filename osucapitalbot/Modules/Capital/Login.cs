@@ -14,7 +14,7 @@ namespace osucapitalbot.Modules.Capital;
 /// </summary>
 public class LoginModule : ModuleBase
 {
-  /*[SlashCommand("login", "Log into osu!capital on the bot.")]
+  //[SlashCommand("login", "Log into osu!capital on the bot.")]
   public async Task HandleCommandAsync()
   {
     await DeferAsync();
@@ -25,7 +25,7 @@ public class LoginModule : ModuleBase
 
     // Inform the user on how to get the login cookie, and add a button to open the login modal.
     await FollowupAsync(embed: Embeds.LoginInstructions, components: builder.Build());
-  } */
+  }
 
   [ComponentInteraction("login_cookie_button")]
   public async Task HandleButtonAsync()

@@ -24,6 +24,6 @@ public class InfoCommandModule : InteractionModuleBase<SocketInteractionContext>
     await DeferAsync();
 
     // Return the info embed to the user.
-    await FollowupAsync(embed: Embeds.Info(await _osu.IsAvailableAsync(), await _capital.IsAvailableAsync()));
+    await FollowupAsync(embed: Embeds.Info((await _osu.CheckAvailableAsync()).IsSuccessful, (await _capital.CheckAvailableAsync()).IsSuccessful));
   }
 }
