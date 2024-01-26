@@ -1,4 +1,5 @@
 ﻿using Discord;
+using osucapitalbot.Models.Capital;
 using osucapitalbot.Models.Osu;
 using System.Runtime.Serialization;
 
@@ -89,9 +90,39 @@ internal static class Embeds
       .Build();
     }
 
+  /// <summary>
+  /// Returns an embed for displaying the currently trending stocks.
+  /// </summary>
+  /// <param name="stocks">The trending stocks.</param>
+  public static Embed TrendingStocks(Stock[] stocks)
+  {
+    // Build the stock listing.
+    List<string> description = new List<string>();
+    foreach(Stock stock in stocks)
+      description.Add($"**+{stock.AverageChangeLast48h:N2}% [{stock.OsuName}](https://osucapital.com/stock/{stock.Id})** • " +
+                      $"[osu!](https://osu.ppy.sh/u/{stock.Id}) • *{stock.Price:N2}* {_emojis["osucoin"]} • #{stock.OsuRank:N0}");
+
+    return BaseEmbed
+      .WithColor(new Color(0x61D6D6))
+      .WithTitle("Currently Trending Stocks")
+      .WithDescription(string.Join("\n", description))
+      .Build();
+  }
+
+  /// <summary>
+  /// Returns an embed containing login instructions.
+  /// </summary>
   public static Embed LoginInstructions => BaseEmbed
     .WithTitle("Login Instructions")
     .WithDescription("In order to allow the bot to interact with osu!capital on your behalf, you will need to provide your osu!capital session cookie. Instructions on how to obtain it can be found below.")
     .Build();
+
+  /// <summary>
+  /// A dictionary containing quick access to custom emojis.
+  /// </summary>
+  private static Dictionary<string, string> _emojis = new Dictionary<string, string>()
+  {
+    { "osucoin", "<:osucoin:1200223778043600910>" }
+  };
 }
 

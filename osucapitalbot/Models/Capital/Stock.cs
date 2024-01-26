@@ -16,7 +16,7 @@ public class Stock
   /// The ID of this stock. This always equals to the osu! user ID of the user this stock represents.
   /// </summary>
   [JsonProperty("stock_id")]
-  public int StockId { get; private set; }
+  public int Id { get; private set; }
 
   /// <summary>
   /// The price for one share of this stock.

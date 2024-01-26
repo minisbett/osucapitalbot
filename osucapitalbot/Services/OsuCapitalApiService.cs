@@ -38,15 +38,15 @@ public class OsuCapitalApiService
     catch (Exception ex)
     {
       _logger.LogError("CheckAvailableAsync() failed: {Message}", ex.Message);
-      return Error.APIUnavailable;
+      return Error.Unspecific;
     }
   }
 
   /// <summary>
-  /// Returns all trending stocks on osu!capital. If an error occured, null is returned.
+  /// Returns all trending stocks on osu!capital.
   /// </summary>
-  /// <returns></returns>
-  public async Task<Stock[]?> GetTrendingStocksAsync()
+  /// <returns>The trending stocks.</returns>
+  public async Task<Result<Stock[]>> GetTrendingStocksAsync()
   {
     try
     {
@@ -54,13 +54,13 @@ public class OsuCapitalApiService
       string json = await _http.GetStringAsync("trending_stocks");
 
       // Parse the JSON and return it.
-      return JsonConvert.DeserializeObject<Stock[]>(json);
+      return JsonConvert.DeserializeObject<Stock[]>(json) ?? throw new Exception("The deserialized JSON is null.");
     }
     catch (Exception ex)
     {
       // If an error occured, log it and return null.
       _logger.LogError("An error occured while trying to get the trending stocks: {Message}", ex.Message);
-        return null;
+      return Result.Failure<Stock[]>(Error.Unspecific);
     }
   }
 }

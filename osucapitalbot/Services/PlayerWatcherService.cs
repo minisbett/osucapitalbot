@@ -45,6 +45,10 @@ public class PlayerWatcherService : DiscordClientService
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {
+#if DEBUG
+    return;
+#endif
+
     Logger.LogInformation("Service is running.");
 
     // Run the user watcher asynchronously.

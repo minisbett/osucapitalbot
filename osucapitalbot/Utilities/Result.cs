@@ -92,16 +92,6 @@ public class Error
   public static readonly Error Unspecific = new Error("unspecific", "An error occured.");
 
   /// <summary>
-  /// Indicates that an authorization attempt using OAuth credentials failed.
-  /// </summary>
-  public static readonly Error OAuthAuthorization = new Error("oauth_unauthorized", "Authorization using the OAuth credentials failed.");
-
-  /// <summary>
-  /// Indicates that an API is unavailable.
-  /// </summary>
-  public static readonly Error APIUnavailable = new Error("api_unavailable", "The API is currently unavailable.");
-
-  /// <summary>
   /// The error code.
   /// </summary>
   public string Code { get; }

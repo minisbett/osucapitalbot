@@ -29,14 +29,13 @@ public class ModuleBase : InteractionModuleBase<SocketInteractionContext>
   /// Returns the trending stocks on osu!capital. If an error occured, null is returned.
   /// </summary>
   /// <returns>The trending stocks, or null if an error occured.</returns>
-  public async Task<Stock[]?> GetTrendingSocksAsync()
+  public async Task<Result<Stock[]>> GetTrendingSocksAsync()
   {
     // Get the data from the osu!capital API. If the API returned an error, notify this user accordingly.
-    Stock[]? stocks = await _capital.GetTrendingStocksAsync();
-    if (stocks is null)
+    Result<Stock[]> stocks = await _capital.GetTrendingStocksAsync();
+    if (stocks.IsFailure)
       await FollowupAsync(embed: Embeds.InternalError("An error occured while trying to get the trending stocks."));
 
-    // Return the stocks as-is.
     return stocks;
   }
 }

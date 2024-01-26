@@ -64,7 +64,7 @@ public class OsuApiService
     catch (Exception ex)
     {
       _logger.LogError("CheckAvailableAsync() failed: {Message}", ex.Message);
-      return Error.APIUnavailable;
+      return Error.Unspecific;
     }
   }
 
@@ -110,7 +110,7 @@ public class OsuApiService
     catch (Exception ex)
     {
       _logger.LogError("Failed to request an osu! API v2 access token: {Message}", ex.Message);
-      return Error.OAuthAuthorization;
+      return Error.Unspecific;
     }
 
     return Result.Success();
@@ -134,9 +134,13 @@ public class OsuApiService
       // Get the JSON from the osu! API.
       string json = await _http.GetStringAsync($"api/v2/rankings/osu/performance?cursor[page]={page}");
 
-      // Parse the JSON into a dynamic object and try to convert it into an array of users.
+      // Parse the JSON into a dynamic object and validate it.
       dynamic response = JsonConvert.DeserializeObject<dynamic>(json)!;
-      return JsonConvert.DeserializeObject<RankedOsuUser[]>(response.ranking.ToString());
+      if (response is null || response.ranking is null)
+        throw new Exception("The response or its ranking property are null.");
+
+      // Deserialize the JSON at the "ranking" key into an array of ranked userse.
+      return JsonConvert.DeserializeObject<RankedOsuUser[]>(response.ranking.ToString()) ?? throw new Exception("The parsed JSON is null");
     }
     catch (Exception ex)
     {
