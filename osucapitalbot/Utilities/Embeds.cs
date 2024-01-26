@@ -122,7 +122,7 @@ internal static class Embeds
   /// </summary>
   private static Dictionary<string, string> _emojis = new Dictionary<string, string>()
   {
-    { "osucoin", "<:osucoin:1200223778043600910>" }
+    { "osucoin", "<:osucoin:1200223506810556487>" }
   };
 }
 
