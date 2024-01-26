@@ -1,7 +1,7 @@
 # osu! capital bot
 An osu!-related Discord bot for https://osucapital.com/, used on the osu! capital Discord server.
 
-[Join The osu! capital Discord]([https://discord.gg/aqPCnXu](https://discord.gg/bWKseW8CAr))
+[Join The osu! capital Discord](https://discord.gg/bWKseW8CAr)
 
 # Setup for deployment
 
