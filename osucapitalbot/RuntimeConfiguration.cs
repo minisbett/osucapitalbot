@@ -11,6 +11,7 @@ namespace osucapitalbot;
 /// </summary>
 public static class RuntimeConfiguration
 {
+#if !DEBUG
   /// <summary>
   /// The Guild ID of the osu!capital Discord.
   /// </summary>
@@ -20,4 +21,15 @@ public static class RuntimeConfiguration
   /// The channel ID of the stock-watcher channel in the <see cref="OSUCAPITAL_GUILD_ID"/> Guild.
   /// </summary>
   public const ulong OSUCAPITAL_STOCKWATCHER_CHANNEL = 1199668177412567121;
+#else
+  /// <summary>
+  /// The Guild ID of the osu!capital Discord.
+  /// </summary>
+  public const ulong OSUCAPITAL_GUILD_ID = 1009893337639161856;
+
+  /// <summary>
+  /// The channel ID of the player-watcher channel in the <see cref="OSUCAPITAL_GUILD_ID"/> Guild.
+  /// </summary>
+  public const ulong OSUCAPITAL_STOCKWATCHER_CHANNEL = 1200452032008556615;
+#endif
 }
